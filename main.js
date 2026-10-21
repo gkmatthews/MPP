@@ -24,7 +24,7 @@ scene.add(light);
 // Load GLB model
 const loader = new THREE.GLTFLoader();
 loader.load(
-  "model.glb", // <-- replace with your file path
+  "Assets/556Case.glb", 
   (gltf) => {
     const model = gltf.scene;
     model.scale.set(1, 1, 1);
