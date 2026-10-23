@@ -23,7 +23,7 @@ camera.position.set(2, 1.5, 3);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
-controls.minDistance = 50;
+controls.minDistance = 125;
 controls.maxDistance = 300;
 controls.target.set(0, 0, 0);
 
