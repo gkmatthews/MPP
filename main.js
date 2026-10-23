@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';   // ← add this
 
 const canvas = document.getElementById("viewer");
 
@@ -19,7 +20,6 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.set(2, 2, 4);
 
-// Note: no more "THREE." in front of OrbitControls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
@@ -27,8 +27,13 @@ controls.enableDamping = true;
 const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
 scene.add(light);
 
-// Load GLB model
-const loader = new GLTFLoader();   // ← also no "THREE."
+// --- Draco support ---
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/'); // official Google CDN
+
+const loader = new GLTFLoader();
+loader.setDRACOLoader(dracoLoader);   // ← this is the key line
+
 loader.load(
   "Assets/556Case.glb",
   (gltf) => {
