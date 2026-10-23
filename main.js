@@ -46,7 +46,12 @@ dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5
 const loader = new GLTFLoader();
 loader.setDRACOLoader(dracoLoader);
 
+
+// Model
+// ... keep all the previous imports and setup the same ...
+
 let model = null;
+const materials = new Map(); // name → material
 
 loader.load(
   "Assets/556Case.glb",
@@ -54,25 +59,91 @@ loader.load(
     model = gltf.scene;
     scene.add(model);
 
-    // Auto-center and frame the model
+    // Center and frame the model (same as before)
     const box = new THREE.Box3().setFromObject(model);
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
 
-    model.position.sub(center); // center the model at origin
+    model.position.sub(center);
 
     const maxDim = Math.max(size.x, size.y, size.z);
     const fov = camera.fov * (Math.PI / 180);
     let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
-    cameraZ *= 100;   // was 1.6  → higher number = more zoomed out
+    cameraZ *= 2.8; // your preferred zoom-out value
 
     camera.position.set(cameraZ * 0.8, cameraZ * 0.5, cameraZ);
     controls.target.set(0, 0, 0);
     controls.update();
+
+    // --- Collect materials and build color pickers ---
+    createColorPickers(model);
   },
   undefined,
   (error) => console.error(error)
 );
+
+function createColorPickers(object) {
+  const container = document.getElementById("color-controls");
+  container.innerHTML = "";
+  materials.clear();
+
+  object.traverse((child) => {
+    if (!child.isMesh || !child.material) return;
+
+    // Handle both single materials and material arrays
+    const mats = Array.isArray(child.material) ? child.material : [child.material];
+
+    mats.forEach((mat, index) => {
+      // Give it a readable name
+      let name = child.name || mat.name || `Part ${materials.size + 1}`;
+      if (mats.length > 1) name += ` (${index + 1})`;
+
+      // Avoid duplicates if the same material is reused
+      if (materials.has(name)) return;
+
+      // Clone the material so changing one part doesn’t affect others
+      // that share the original material
+      const uniqueMat = mat.clone();
+      if (Array.isArray(child.material)) {
+        child.material[index] = uniqueMat;
+      } else {
+        child.material = uniqueMat;
+      }
+
+      materials.set(name, uniqueMat);
+
+      // Create the UI row
+      const row = document.createElement("div");
+      row.className = "color-row";
+
+      const label = document.createElement("label");
+      label.textContent = name;
+
+      const input = document.createElement("input");
+      input.type = "color";
+
+      // Set the initial color from the material
+      const color = uniqueMat.color || new THREE.Color(0xffffff);
+      input.value = "#" + color.getHexString();
+
+      input.addEventListener("input", (e) => {
+        uniqueMat.color.set(e.target.value);
+        // If the material has a map (texture), you may also want:
+        // uniqueMat.map = null;  // optional – removes texture so pure color shows
+        uniqueMat.needsUpdate = true;
+      });
+
+      row.appendChild(label);
+      row.appendChild(input);
+      container.appendChild(row);
+    });
+  });
+
+  if (materials.size === 0) {
+    container.innerHTML = "<p style='color:#777;font-size:0.85rem'>No materials found</p>";
+  }
+}
+
 
 // Resize handler
 function resize() {
