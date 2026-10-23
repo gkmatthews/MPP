@@ -24,7 +24,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
 controls.minDistance = 0.5;
-controls.maxDistance = 20;
+controls.maxDistance = 200;
 controls.target.set(0, 0, 0);
 
 // Better lighting
