@@ -1,4 +1,9 @@
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
 const canvas = document.getElementById("viewer");
+
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -14,7 +19,8 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.set(2, 2, 4);
 
-const controls = new THREE.OrbitControls(camera, renderer.domElement);
+// Note: no more "THREE." in front of OrbitControls
+const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
 // Lighting
@@ -22,9 +28,9 @@ const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
 scene.add(light);
 
 // Load GLB model
-const loader = new THREE.GLTFLoader();
+const loader = new GLTFLoader();   // ← also no "THREE."
 loader.load(
-  "Assets/556Case.glb", 
+  "Assets/556Case.glb",
   (gltf) => {
     const model = gltf.scene;
     model.scale.set(1, 1, 1);
