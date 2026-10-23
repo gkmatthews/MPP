@@ -69,7 +69,7 @@ loader.load(
     const maxDim = Math.max(size.x, size.y, size.z);
     const fov = camera.fov * (Math.PI / 180);
     let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
-    cameraZ *= 2.8; // your preferred zoom-out value
+    cameraZ *= 100; // your preferred zoom-out value
 
     camera.position.set(cameraZ * 0.8, cameraZ * 0.5, cameraZ);
     controls.target.set(0, 0, 0);
