@@ -6,7 +6,6 @@
   <title>3D Model Viewer</title>
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Import map tells the browser where to find "three" and its addons -->
   <script type="importmap">
   {
     "imports": {
@@ -17,9 +16,17 @@
   </script>
 </head>
 <body>
-  <canvas id="viewer"></canvas>
+  <div class="viewer-container">
+    <div class="viewer-header">
+      <h1>556 Case Viewer</h1>
+      <button id="reset-btn">Reset View</button>
+    </div>
+    <canvas id="viewer"></canvas>
+    <div class="viewer-footer">
+      Drag to rotate · Scroll to zoom · Right-click to pan
+    </div>
+  </div>
 
-  <!-- Your code must be a module -->
   <script type="module" src="main.js"></script>
 </body>
 </html>
