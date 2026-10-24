@@ -6,14 +6,16 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 const canvas = document.getElementById("viewer");
 const resetBtn = document.getElementById("reset-btn");
 
-// Renderer setup
+// --- Renderer & Tone Mapping ---
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; // Prevents color clipping under bright light
+renderer.toneMappingExposure = 1.15; // Overall exposure boost
 
-// Scene setup
+// --- Scene ---
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x111118);
+scene.background = new THREE.Color(0x22252a); // Clean, neutral daylight studio background
 
 // Camera setup
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
@@ -27,17 +29,20 @@ controls.minDistance = 200;
 controls.maxDistance = 250;
 controls.target.set(0, 0, 0);
 
-// Lighting setup
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444455, 1.2);
+// --- Daylight Lighting Setup ---
+// Hemisphere Light: simulates sky light (cool blue-white above, warm ground bounce below)
+const hemiLight = new THREE.HemisphereLight(0xf0f4ff, 0x44403b, 1.6);
 scene.add(hemiLight);
 
-const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.5);
-dirLight1.position.set(5, 10, 7);
-scene.add(dirLight1);
+// Main "Sun" Light: strong, bright white light from above/front
+const sunLight = new THREE.DirectionalLight(0xfffaf0, 2.2);
+sunLight.position.set(10, 25, 15);
+scene.add(sunLight);
 
-const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.6);
-dirLight2.position.set(-5, -2, -5);
-scene.add(dirLight2);
+// Secondary Fill Light: softer cool light from the opposite side to open up shadows
+const fillLight = new THREE.DirectionalLight(0xdbeafe, 1.0);
+fillLight.position.set(-15, 10, -10);
+scene.add(fillLight);
 
 // Draco & GLTF Loader
 const dracoLoader = new DRACOLoader();
