@@ -10,12 +10,12 @@ const resetBtn = document.getElementById("reset-btn");
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping; // Prevents color clipping under bright light
-renderer.toneMappingExposure = 1.15; // Overall exposure boost
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
 
 // --- Scene ---
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x22252a); // Clean, neutral daylight studio background
+scene.background = new THREE.Color(0x22252a);
 
 // Camera setup
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
@@ -77,8 +77,8 @@ loader.load(
     controls.maxDistance = maxDim * 3;
     controls.target.set(0, 0, 0);
     controls.update();
-    controls.minPolarAngle = 0;                  // looking straight down from above
-    controls.maxPolarAngle = Math.PI / 2;        // looking straight from the side (horizon)
+    controls.minPolarAngle = 0;
+    controls.maxPolarAngle = Math.PI / 2;
 
     createMaterialControls(model);
   },
@@ -105,7 +105,6 @@ function createMaterialControls(object) {
   container.innerHTML = "";
   materials.clear();
 
-  // Grouping map: Category Name -> Array of unique materials
   const materialGroups = new Map();
 
   object.traverse((child) => {
@@ -116,15 +115,12 @@ function createMaterialControls(object) {
     mats.forEach((mat, index) => {
       let rawName = child.name || mat.name || `Part`;
       
-      // Grouping logic: If the part name includes "latch" (case-insensitive), group them together!
       let groupKey = rawName;
       if (rawName.toLowerCase().includes("latch")) {
         groupKey = "Latches";
       }
 
-      // Avoid duplicate material processing within the same group
       if (materials.has(groupKey)) {
-        // If it's already registered, ensure this mesh uses the cloned material instance
         const existingMat = materials.get(groupKey);
         if (Array.isArray(child.material)) {
           child.material[index] = existingMat;
@@ -134,7 +130,6 @@ function createMaterialControls(object) {
         return;
       }
 
-      // Clone the material so changes are isolated
       const uniqueMat = mat.clone();
       if (Array.isArray(child.material)) {
         child.material[index] = uniqueMat;
@@ -147,7 +142,6 @@ function createMaterialControls(object) {
     });
   });
 
-  // Build UI controls for each unique material / group
   materialGroups.forEach((mat, groupName) => {
     const card = document.createElement("div");
     card.className = "color-row";
@@ -156,7 +150,6 @@ function createMaterialControls(object) {
     label.textContent = groupName;
     card.appendChild(label);
 
-    // Swatch container
     const swatchContainer = document.createElement("div");
     swatchContainer.className = "swatch-container";
 
@@ -168,17 +161,14 @@ function createMaterialControls(object) {
       swatch.style.backgroundColor = preset.hex;
       swatch.title = preset.name;
 
-      // Check if this swatch matches the initial material color closely
       if (preset.hex.toLowerCase() === currentHex.toLowerCase()) {
         swatch.classList.add("active");
       }
 
-        swatch.addEventListener("click", () => {
-        // Update active class on sibling swatches
+      swatch.addEventListener("click", () => {
         swatchContainer.querySelectorAll(".color-swatch").forEach(s => s.classList.remove("active"));
         swatch.classList.add("active");
 
-        // Apply color, metalness, and roughness
         mat.color.set(preset.hex).convertSRGBToLinear();
         
         if (mat.metalness !== undefined) {
@@ -188,11 +178,6 @@ function createMaterialControls(object) {
           mat.roughness = preset.roughness;
         }
         
-        mat.needsUpdate = true;
-      });
-
-        // Apply color to material (converted to Linear space for Three.js)
-        mat.color.set(preset.hex).convertSRGBToLinear();
         mat.needsUpdate = true;
       });
 
@@ -207,6 +192,7 @@ function createMaterialControls(object) {
     container.innerHTML = "<p style='color:#777;font-size:0.85rem'>No configurable materials found</p>";
   }
 }
+
 // Window resize handler
 function resize() {
   const width = canvas.clientWidth;
