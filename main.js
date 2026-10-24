@@ -29,17 +29,14 @@ controls.minDistance = 200;
 controls.maxDistance = 250;
 controls.target.set(0, 0, 0);
 
-// --- Daylight Lighting Setup ---
-// Hemisphere Light: simulates sky light (cool blue-white above, warm ground bounce below)
+// Bright Daylight Lighting Setup
 const hemiLight = new THREE.HemisphereLight(0xf0f4ff, 0x44403b, 1.6);
 scene.add(hemiLight);
 
-// Main "Sun" Light: strong, bright white light from above/front
 const sunLight = new THREE.DirectionalLight(0xfffaf0, 2.2);
 sunLight.position.set(10, 25, 15);
 scene.add(sunLight);
 
-// Secondary Fill Light: softer cool light from the opposite side to open up shadows
 const fillLight = new THREE.DirectionalLight(0xdbeafe, 1.0);
 fillLight.position.set(-15, 10, -10);
 scene.add(fillLight);
