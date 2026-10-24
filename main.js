@@ -71,7 +71,7 @@ loader.load(
     // Frame model into camera view dynamically
     const maxDim = Math.max(size.x, size.y, size.z);
     const fov = camera.fov * (Math.PI / 180);
-    const cameraDist = (maxDim / 2) / Math.tan(fov / 2) * 2.2;
+    const cameraDist = (maxDim / 2) / Math.tan(fov / 2) * 1.8;
 
     defaultCamPos.set(cameraDist * 0.7, cameraDist * 0.4, cameraDist);
     camera.position.copy(defaultCamPos);
