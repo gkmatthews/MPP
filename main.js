@@ -199,71 +199,101 @@ function createMaterialControls(object) {
   }
 }
 
-function loadSvgAsTexture(svgUrl, callback) {
+function createSvgDecalTexture(svgUrl, onReady) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+
+  // Draw initial visible badge background so we can verify decal projection immediately
+  ctx.fillStyle = '#ff0055'; // Magenta test color
+  ctx.fillRect(0, 0, 512, 512);
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+
   const img = new Image();
   img.crossOrigin = 'Anonymous';
-  
   img.onload = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 1024;  // High quality resolution
-    canvas.height = 1024;
-    const ctx = canvas.getContext('2d');
-
-    // Draw SVG onto canvas
-    ctx.drawImage(img, 0, 0, 1024, 1024);
-
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.colorSpace = THREE.SRGBColorSpace;
+    ctx.clearRect(0, 0, 512, 512);
+    ctx.drawImage(img, 0, 0, 512, 512);
     texture.needsUpdate = true;
-    
-    callback(texture);
   };
-
-  img.onerror = (err) => console.error("Could not load SVG file:", err);
+  img.onerror = () => {
+    console.warn("Could not load SVG from URL:", svgUrl, "- using fallback colored badge.");
+  };
   img.src = svgUrl;
+
+  onReady(texture);
 }
 
 function addLogoDecal(model) {
-  const targetMesh = findTopMesh(model);
+  // Find top mesh
+  let targetMesh = null;
+  model.traverse((child) => {
+    if (child.isMesh && !targetMesh) {
+      const name = child.name.toLowerCase();
+      if (name.includes("lid") || name.includes("top") || name.includes("cover")) {
+        targetMesh = child;
+      }
+    }
+  });
+
+  // Fallback to first available mesh if naming convention doesn't match
   if (!targetMesh) {
-    console.warn("No target mesh found for decal");
+    model.traverse((child) => {
+      if (child.isMesh && !targetMesh) targetMesh = child;
+    });
+  }
+
+  if (!targetMesh) {
+    console.error("No mesh found inside GLTF model to project decal.");
     return;
   }
 
-  // Use canvas helper to load SVG properly
-  loadSvgAsTexture('Assets/556Image.svg', (decalTexture) => {
-    
+  // Ensure matrix transforms are completely up to date
+  model.updateMatrixWorld(true);
+
+  // Compute bounding box in World Coordinates
+  const box = new THREE.Box3().setFromObject(targetMesh);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+
+  // Position projector at the center-top face of the bounding box
+  const position = new THREE.Vector3(center.x, box.max.y, center.z);
+
+  // Rotate projector -90 deg on X axis to point down onto top surface (+Y to -Y projection)
+  const orientation = new THREE.Euler(-Math.PI / 2, 0, 0);
+
+  // Projection dimensions: (Width, Height, Depth)
+  // Making depth equal to model size ensures the box intersects geometry cleanly
+  const decalSize = new THREE.Vector3(size.x * 0.4, size.z * 0.4, size.y * 2);
+
+  createSvgDecalTexture('Assets/556Image.svg', (decalTexture) => {
     const decalMaterial = new THREE.MeshStandardMaterial({
       map: decalTexture,
       transparent: true,
       depthTest: true,
       depthWrite: false,
       polygonOffset: true,
-      polygonOffsetFactor: -10, // Pulls decal forward in 3D depth to prevent Z-fighting
-      roughness: 0.4,
+      polygonOffsetFactor: -4,
+      side: THREE.DoubleSide, // Renders both front & back faces so orientation isn't culled
+      roughness: 0.5,
       metalness: 0.1
     });
 
-    // Bounding Box to align to the lid surface
-    const box = new THREE.Box3().setFromObject(targetMesh);
-    const center = box.getCenter(new THREE.Vector3());
-
-    // Position decal slightly above top lid (+Y offset)
-    const position = new THREE.Vector3(center.x, box.max.y + 0.1, center.z);
-
-    // Orientation: Rotated -90deg on X so decal faces up (+Y)
-    const orientation = new THREE.Euler(-Math.PI / 2, 0, 0);
-
-    // Size: Width, Height, Projection Depth (Depth of 20 ensures projection intersects surface)
-    const size = new THREE.Vector3(30, 30, 20);
-
-    const decalGeo = new DecalGeometry(targetMesh, position, orientation, size);
-    const decalMesh = new THREE.Mesh(decalGeo, decalMaterial);
-
-    model.add(decalMesh);
+    try {
+      const decalGeo = new DecalGeometry(targetMesh, position, orientation, decalSize);
+      const decalMesh = new THREE.Mesh(decalGeo, decalMaterial);
+      
+      // Add directly to the main scene in world coordinates
+      scene.add(decalMesh);
+      console.log("Decal projected successfully at position:", position);
+    } catch (err) {
+      console.error("Error building DecalGeometry:", err);
+    }
   });
 }
-
 
 // Window resize handler
 function resize() {
