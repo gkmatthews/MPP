@@ -171,10 +171,23 @@ function createMaterialControls(object) {
         swatch.classList.add("active");
       }
 
-      swatch.addEventListener("click", () => {
+        swatch.addEventListener("click", () => {
         // Update active class on sibling swatches
         swatchContainer.querySelectorAll(".color-swatch").forEach(s => s.classList.remove("active"));
         swatch.classList.add("active");
+
+        // Apply color, metalness, and roughness
+        mat.color.set(preset.hex).convertSRGBToLinear();
+        
+        if (mat.metalness !== undefined) {
+          mat.metalness = preset.metalness;
+        }
+        if (mat.roughness !== undefined) {
+          mat.roughness = preset.roughness;
+        }
+        
+        mat.needsUpdate = true;
+      });
 
         // Apply color to material (converted to Linear space for Three.js)
         mat.color.set(preset.hex).convertSRGBToLinear();
