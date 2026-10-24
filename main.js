@@ -86,16 +86,16 @@ loader.load(
 
 // 10 Preset Colors Palette
 const PRESET_COLORS = [
-  { name: "Matte Black", hex: "#1a1a1a" },
-  { name: "Gunmetal", hex: "#2e3440" },
-  { name: "Olive Drab", hex: "#4b5320" },
-  { name: "Desert Tan", hex: "#c2b280" },
-  { name: "Brass / Gold", hex: "#d4af37" },
-  { name: "Silver / Steel", hex: "#c0c0c0" },
-  { name: "Crimson Red", hex: "#dc2626" },
-  { name: "Electric Blue", hex: "#2563eb" },
-  { name: "Safety Orange", hex: "#ea580c" },
-  { name: "Pure White", hex: "#f8fafc" }
+  { name: "Matte Black", hex: "#000000" },
+  { name: "Gunmetal", hex: "#75787B" },
+  { name: "Olive Drab", hex: "#5A6D3D" },
+  { name: "Desert Tan", hex: "#C2B29A" },
+  { name: "Brass / Gold", hex: "#F1BE48" },
+  { name: "Powder Puff", hex: "#E684B4" },
+  { name: "Crimson Red", hex: "#BC2726" },
+  { name: "Electric Blue", hex: "#1729AB" },
+  { name: "Safety Orange", hex: "#ED7334" },
+  { name: "Pure White", hex: "#FFFFFF" }
 ];
 
 function createMaterialControls(object) {
