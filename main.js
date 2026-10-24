@@ -90,7 +90,7 @@ const PRESET_COLORS = [
   { name: "Gunmetal", hex: "#75787B" },
   { name: "Olive Drab", hex: "#5A6D3D" },
   { name: "Desert Tan", hex: "#C2B29A" },
-  { name: "Brass / Gold", hex: "#F1BE48" },
+  { name: "Brass / Gold", hex: "#F1BE48", metalness: 0.9, roughness: 0.25 },
   { name: "Powder Puff", hex: "#E684B4" },
   { name: "Crimson Red", hex: "#BC2726" },
   { name: "Electric Blue", hex: "#1729AB" },
