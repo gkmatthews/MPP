@@ -72,7 +72,7 @@ loader.load(
     camera.position.copy(defaultCamPos);
     
     controls.minDistance = maxDim * 0.5;
-    controls.maxDistance = maxDim * 10;
+    controls.maxDistance = maxDim * 1;
     controls.target.set(0, 0, 0);
     controls.update();
     controls.minPolarAngle = 0;                  // looking straight down from above
