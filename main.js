@@ -199,48 +199,69 @@ function createMaterialControls(object) {
   }
 }
 
+function loadSvgAsTexture(svgUrl, callback) {
+  const img = new Image();
+  img.crossOrigin = 'Anonymous';
+  
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;  // High quality resolution
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+
+    // Draw SVG onto canvas
+    ctx.drawImage(img, 0, 0, 1024, 1024);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.needsUpdate = true;
+    
+    callback(texture);
+  };
+
+  img.onerror = (err) => console.error("Could not load SVG file:", err);
+  img.src = svgUrl;
+}
+
 function addLogoDecal(model) {
-  // 1. Load the SVG texture
-  const textureLoader = new THREE.TextureLoader();
-  textureLoader.load(
-    'Assets/556Image.svg', // Replace with the path to your SVG file
-    (decalTexture) => {
-      decalTexture.colorSpace = THREE.SRGBColorSpace;
+  const targetMesh = findTopMesh(model);
+  if (!targetMesh) {
+    console.warn("No target mesh found for decal");
+    return;
+  }
 
-      // 2. Create a material for the decal
-      const decalMaterial = new THREE.MeshStandardMaterial({
-        map: decalTexture,
-        transparent: true,
-        roughness: 0.5,
-        metalness: 0.1,
-        depthTest: true,
-        depthWrite: false,
-        polygonOffset: true,
-        polygonOffsetFactor: -4, // Prevents z-fighting / flickering against the case surface
-      });
+  // Use canvas helper to load SVG properly
+  loadSvgAsTexture('Assets/556Image.svg', (decalTexture) => {
+    
+    const decalMaterial = new THREE.MeshStandardMaterial({
+      map: decalTexture,
+      transparent: true,
+      depthTest: true,
+      depthWrite: false,
+      polygonOffset: true,
+      polygonOffsetFactor: -10, // Pulls decal forward in 3D depth to prevent Z-fighting
+      roughness: 0.4,
+      metalness: 0.1
+    });
 
-      // Position the decal on the top face
-      // Get bounding box of the top mesh to center the decal on top of it
-      const topBox = new THREE.Box3().setFromObject(targetMesh);
-      const topCenter = topBox.getCenter(new THREE.Vector3());
+    // Bounding Box to align to the lid surface
+    const box = new THREE.Box3().setFromObject(targetMesh);
+    const center = box.getCenter(new THREE.Vector3());
 
-      // Place it right at the top surface (topCenter.x, topBox.max.y, topCenter.z)
-      const position = new THREE.Vector3(topCenter.x, topBox.max.y, topCenter.z);
+    // Position decal slightly above top lid (+Y offset)
+    const position = new THREE.Vector3(center.x, box.max.y + 0.1, center.z);
 
-      // Rotate decal so it lies flat on the top surface pointing upwards (+Y)
-      const orientation = new THREE.Euler(-Math.PI / 2, 0, 0); 
-      
-      // Projection depth & size (Width, Height, Projection Depth)
-      const size = new THREE.Vector3(20, 20, 10);
+    // Orientation: Rotated -90deg on X so decal faces up (+Y)
+    const orientation = new THREE.Euler(-Math.PI / 2, 0, 0);
 
-      const decalGeo = new DecalGeometry(targetMesh, position, orientation, size);
-      const decalMesh = new THREE.Mesh(decalGeo, decalMaterial);
-      
-      model.add(decalMesh); // Attach it to the model so it rotates with it
-    },
-    undefined,
-    (err) => console.error("Error loading decal SVG:", err)
-  );
+    // Size: Width, Height, Projection Depth (Depth of 20 ensures projection intersects surface)
+    const size = new THREE.Vector3(30, 30, 20);
+
+    const decalGeo = new DecalGeometry(targetMesh, position, orientation, size);
+    const decalMesh = new THREE.Mesh(decalGeo, decalMaterial);
+
+    model.add(decalMesh);
+  });
 }
 
 
