@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { DecalGeometry } from 'three/addons/geometries/DecalGeometry.js';
 
 const canvas = document.getElementById("viewer");
 const resetBtn = document.getElementById("reset-btn");
