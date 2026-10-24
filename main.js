@@ -219,24 +219,20 @@ function addLogoDecal(model) {
         polygonOffsetFactor: -4, // Prevents z-fighting / flickering against the case surface
       });
 
-      // 3. Find the target mesh you want to put the logo on (or use the whole model root)
-      // If you want it on a specific part, you can search by name:
-      let targetMesh = null;
-      model.traverse((child) => {
-        if (child.isMesh && !targetMesh) {
-          targetMesh = child; // Grabs the first available mesh as a target
-        }
-      });
+      // Position the decal on the top face
+      // Get bounding box of the top mesh to center the decal on top of it
+      const topBox = new THREE.Box3().setFromObject(targetMesh);
+      const topCenter = topBox.getCenter(new THREE.Vector3());
 
-      if (!targetMesh) return;
+      // Place it right at the top surface (topCenter.x, topBox.max.y, topCenter.z)
+      const position = new THREE.Vector3(topCenter.x, topBox.max.y, topCenter.z);
 
-      // 4. Define where the decal goes on the object (Position, Rotation, Scale)
-      // Adjust these vectors based on where your case's front/top surface is located
-      const position = new THREE.Vector3(0, 5, 20); // XYZ coordinates on the model
-      const orientation = new THREE.Euler(0, 0, 0); // Rotation angles
-      const size = new THREE.Vector3(15, 15, 15);   // Width, height, depth projection size
+      // Rotate decal so it lies flat on the top surface pointing upwards (+Y)
+      const orientation = new THREE.Euler(-Math.PI / 2, 0, 0); 
+      
+      // Projection depth & size (Width, Height, Projection Depth)
+      const size = new THREE.Vector3(20, 20, 10);
 
-      // 5. Generate and add the decal mesh
       const decalGeo = new DecalGeometry(targetMesh, position, orientation, size);
       const decalMesh = new THREE.Mesh(decalGeo, decalMaterial);
       
