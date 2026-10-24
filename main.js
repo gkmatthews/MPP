@@ -24,7 +24,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
 controls.minDistance = 200;
-controls.maxDistance = 300;
+controls.maxDistance = 250;
 controls.target.set(0, 0, 0);
 
 // Lighting setup
@@ -72,7 +72,7 @@ loader.load(
     camera.position.copy(defaultCamPos);
     
     controls.minDistance = maxDim * 0.5;
-    controls.maxDistance = maxDim * 5;
+    controls.maxDistance = maxDim * 3;
     controls.target.set(0, 0, 0);
     controls.update();
     controls.minPolarAngle = 0;                  // looking straight down from above
