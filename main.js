@@ -203,7 +203,7 @@ function addLogoDecal(model) {
   // 1. Load the SVG texture
   const textureLoader = new THREE.TextureLoader();
   textureLoader.load(
-    'Assets/your-logo.svg', // Replace with the path to your SVG file
+    'Assets/556Image.svg', // Replace with the path to your SVG file
     (decalTexture) => {
       decalTexture.colorSpace = THREE.SRGBColorSpace;
 
