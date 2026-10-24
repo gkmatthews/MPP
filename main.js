@@ -82,10 +82,27 @@ loader.load(
   (error) => console.error("Error loading model:", error)
 );
 
+// 10 Preset Colors Palette
+const PRESET_COLORS = [
+  { name: "Matte Black", hex: "#1a1a1a" },
+  { name: "Gunmetal", hex: "#2e3440" },
+  { name: "Olive Drab", hex: "#4b5320" },
+  { name: "Desert Tan", hex: "#c2b280" },
+  { name: "Brass / Gold", hex: "#d4af37" },
+  { name: "Silver / Steel", hex: "#c0c0c0" },
+  { name: "Crimson Red", hex: "#dc2626" },
+  { name: "Electric Blue", hex: "#2563eb" },
+  { name: "Safety Orange", hex: "#ea580c" },
+  { name: "Pure White", hex: "#f8fafc" }
+];
+
 function createMaterialControls(object) {
   const container = document.getElementById("color-controls");
   container.innerHTML = "";
   materials.clear();
+
+  // Grouping map: Category Name -> Array of unique materials
+  const materialGroups = new Map();
 
   object.traverse((child) => {
     if (!child.isMesh || !child.material) return;
@@ -93,12 +110,27 @@ function createMaterialControls(object) {
     const mats = Array.isArray(child.material) ? child.material : [child.material];
 
     mats.forEach((mat, index) => {
-      let name = child.name || mat.name || `Part ${materials.size + 1}`;
-      if (mats.length > 1) name += ` (${index + 1})`;
+      let rawName = child.name || mat.name || `Part`;
+      
+      // Grouping logic: If the part name includes "latch" (case-insensitive), group them together!
+      let groupKey = rawName;
+      if (rawName.toLowerCase().includes("latch")) {
+        groupKey = "Latches";
+      }
 
-      if (materials.has(name)) return;
+      // Avoid duplicate material processing within the same group
+      if (materials.has(groupKey)) {
+        // If it's already registered, ensure this mesh uses the cloned material instance
+        const existingMat = materials.get(groupKey);
+        if (Array.isArray(child.material)) {
+          child.material[index] = existingMat;
+        } else {
+          child.material = existingMat;
+        }
+        return;
+      }
 
-      // Unique material per part
+      // Clone the material so changes are isolated
       const uniqueMat = mat.clone();
       if (Array.isArray(child.material)) {
         child.material[index] = uniqueMat;
@@ -106,59 +138,58 @@ function createMaterialControls(object) {
         child.material = uniqueMat;
       }
 
-      materials.set(name, uniqueMat);
-
-      // Create UI Control Card
-      const card = document.createElement("div");
-      card.className = "color-row";
-
-      const label = document.createElement("label");
-      label.textContent = name;
-      card.appendChild(label);
-
-      // Color Picker
-      const inputColor = document.createElement("input");
-      inputColor.type = "color";
-      const initialColor = uniqueMat.color || new THREE.Color(0xffffff);
-      inputColor.value = "#" + initialColor.getHexString();
-
-      inputColor.addEventListener("input", (e) => {
-        uniqueMat.color.set(e.target.value).convertSRGBToLinear();
-        uniqueMat.needsUpdate = true;
-      });
-      card.appendChild(inputColor);
-
-      // Roughness slider (if standard/physical material)
-      if (uniqueMat.roughness !== undefined) {
-        const roughLabel = document.createElement("span");
-        roughLabel.className = "control-sublabel";
-        roughLabel.textContent = "R";
-        
-        const inputRoughness = document.createElement("input");
-        inputRoughness.type = "range";
-        inputRoughness.min = "0";
-        inputRoughness.max = "1";
-        inputRoughness.step = "0.05";
-        inputRoughness.value = uniqueMat.roughness;
-        inputRoughness.className = "material-slider";
-
-        inputRoughness.addEventListener("input", (e) => {
-          uniqueMat.roughness = parseFloat(e.target.value);
-        });
-
-        card.appendChild(roughLabel);
-        card.appendChild(inputRoughness);
-      }
-
-      container.appendChild(card);
+      materials.set(groupKey, uniqueMat);
+      materialGroups.set(groupKey, uniqueMat);
     });
   });
 
-  if (materials.size === 0) {
+  // Build UI controls for each unique material / group
+  materialGroups.forEach((mat, groupName) => {
+    const card = document.createElement("div");
+    card.className = "color-row";
+
+    const label = document.createElement("label");
+    label.textContent = groupName;
+    card.appendChild(label);
+
+    // Swatch container
+    const swatchContainer = document.createElement("div");
+    swatchContainer.className = "swatch-container";
+
+    let currentHex = "#" + (mat.color || new THREE.Color(0xffffff)).getHexString();
+
+    PRESET_COLORS.forEach((preset) => {
+      const swatch = document.createElement("button");
+      swatch.className = "color-swatch";
+      swatch.style.backgroundColor = preset.hex;
+      swatch.title = preset.name;
+
+      // Check if this swatch matches the initial material color closely
+      if (preset.hex.toLowerCase() === currentHex.toLowerCase()) {
+        swatch.classList.add("active");
+      }
+
+      swatch.addEventListener("click", () => {
+        // Update active class on sibling swatches
+        swatchContainer.querySelectorAll(".color-swatch").forEach(s => s.classList.remove("active"));
+        swatch.classList.add("active");
+
+        // Apply color to material (converted to Linear space for Three.js)
+        mat.color.set(preset.hex).convertSRGBToLinear();
+        mat.needsUpdate = true;
+      });
+
+      swatchContainer.appendChild(swatch);
+    });
+
+    card.appendChild(swatchContainer);
+    container.appendChild(card);
+  });
+
+  if (materialGroups.size === 0) {
     container.innerHTML = "<p style='color:#777;font-size:0.85rem'>No configurable materials found</p>";
   }
 }
-
 // Window resize handler
 function resize() {
   const width = canvas.clientWidth;
