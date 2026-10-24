@@ -26,6 +26,8 @@ controls.dampingFactor = 0.08;
 controls.minDistance = 125;
 controls.maxDistance = 300;
 controls.target.set(0, 0, 0);
+controls.minPolarAngle = 0.1;
+controls.maxPolarAngle = Math.PI / 2;
 
 // Better lighting
 const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
