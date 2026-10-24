@@ -6,54 +6,49 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 const canvas = document.getElementById("viewer");
 const resetBtn = document.getElementById("reset-btn");
 
-// Renderer
+// Renderer setup
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-// Scene
+// Scene setup
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x111111);
+scene.background = new THREE.Color(0x111118);
 
-// Camera
-const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
-camera.position.set(2, 1.5, 3);
+// Camera setup
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+camera.position.set(0, 0, 100);
 
-// Controls
+// Orbit Controls setup
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
-controls.minDistance = 125;
-controls.maxDistance = 300;
+controls.minDistance = 10;
+controls.maxDistance = 500;
 controls.target.set(0, 0, 0);
-controls.minPolarAngle = 0.1;
-controls.maxPolarAngle = Math.PI / 2;
 
-// Better lighting
-const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
+// Lighting setup
+const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444455, 1.2);
 scene.add(hemiLight);
 
-const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
-dirLight.position.set(5, 10, 7);
-scene.add(dirLight);
+const dirLight1 = new THREE.DirectionalLight(0xffffff, 1.5);
+dirLight1.position.set(5, 10, 7);
+scene.add(dirLight1);
 
-const fillLight = new THREE.DirectionalLight(0xffffff, 0.4);
-fillLight.position.set(-5, 2, -5);
-scene.add(fillLight);
+const dirLight2 = new THREE.DirectionalLight(0xffffff, 0.6);
+dirLight2.position.set(-5, -2, -5);
+scene.add(dirLight2);
 
-// Draco + GLTF
+// Draco & GLTF Loader
 const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
 
 const loader = new GLTFLoader();
 loader.setDRACOLoader(dracoLoader);
 
-
-// Model
-// ... keep all the previous imports and setup the same ...
-
 let model = null;
-const materials = new Map(); // name → material
+let defaultCamPos = new THREE.Vector3();
+const materials = new Map();
 
 loader.load(
   "Assets/556Case.glb",
@@ -61,30 +56,33 @@ loader.load(
     model = gltf.scene;
     scene.add(model);
 
-    // Center and frame the model (same as before)
+    // Center model geometry
     const box = new THREE.Box3().setFromObject(model);
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
 
     model.position.sub(center);
 
+    // Frame model into camera view dynamically
     const maxDim = Math.max(size.x, size.y, size.z);
     const fov = camera.fov * (Math.PI / 180);
-    let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
-    cameraZ *= 100; // your preferred zoom-out value
+    const cameraDist = (maxDim / 2) / Math.tan(fov / 2) * 2.2;
 
-    camera.position.set(cameraZ * 0.8, cameraZ * 0.5, cameraZ);
+    defaultCamPos.set(cameraDist * 0.7, cameraDist * 0.4, cameraDist);
+    camera.position.copy(defaultCamPos);
+    
+    controls.minDistance = maxDim * 0.5;
+    controls.maxDistance = maxDim * 10;
     controls.target.set(0, 0, 0);
     controls.update();
 
-    // --- Collect materials and build color pickers ---
-    createColorPickers(model);
+    createMaterialControls(model);
   },
   undefined,
-  (error) => console.error(error)
+  (error) => console.error("Error loading model:", error)
 );
 
-function createColorPickers(object) {
+function createMaterialControls(object) {
   const container = document.getElementById("color-controls");
   container.innerHTML = "";
   materials.clear();
@@ -92,19 +90,15 @@ function createColorPickers(object) {
   object.traverse((child) => {
     if (!child.isMesh || !child.material) return;
 
-    // Handle both single materials and material arrays
     const mats = Array.isArray(child.material) ? child.material : [child.material];
 
     mats.forEach((mat, index) => {
-      // Give it a readable name
       let name = child.name || mat.name || `Part ${materials.size + 1}`;
       if (mats.length > 1) name += ` (${index + 1})`;
 
-      // Avoid duplicates if the same material is reused
       if (materials.has(name)) return;
 
-      // Clone the material so changing one part doesn’t affect others
-      // that share the original material
+      // Unique material per part
       const uniqueMat = mat.clone();
       if (Array.isArray(child.material)) {
         child.material[index] = uniqueMat;
@@ -114,70 +108,83 @@ function createColorPickers(object) {
 
       materials.set(name, uniqueMat);
 
-      // Create the UI row
-      const row = document.createElement("div");
-      row.className = "color-row";
+      // Create UI Control Card
+      const card = document.createElement("div");
+      card.className = "color-row";
 
       const label = document.createElement("label");
       label.textContent = name;
+      card.appendChild(label);
 
-      const input = document.createElement("input");
-      input.type = "color";
+      // Color Picker
+      const inputColor = document.createElement("input");
+      inputColor.type = "color";
+      const initialColor = uniqueMat.color || new THREE.Color(0xffffff);
+      inputColor.value = "#" + initialColor.getHexString();
 
-      // Set the initial color from the material
-      const color = uniqueMat.color || new THREE.Color(0xffffff);
-      input.value = "#" + color.getHexString();
-
-      input.addEventListener("input", (e) => {
-        uniqueMat.color.set(e.target.value);
-        // If the material has a map (texture), you may also want:
-        // uniqueMat.map = null;  // optional – removes texture so pure color shows
+      inputColor.addEventListener("input", (e) => {
+        uniqueMat.color.set(e.target.value).convertSRGBToLinear();
         uniqueMat.needsUpdate = true;
       });
+      card.appendChild(inputColor);
 
-      row.appendChild(label);
-      row.appendChild(input);
-      container.appendChild(row);
+      // Roughness slider (if standard/physical material)
+      if (uniqueMat.roughness !== undefined) {
+        const roughLabel = document.createElement("span");
+        roughLabel.className = "control-sublabel";
+        roughLabel.textContent = "R";
+        
+        const inputRoughness = document.createElement("input");
+        inputRoughness.type = "range";
+        inputRoughness.min = "0";
+        inputRoughness.max = "1";
+        inputRoughness.step = "0.05";
+        inputRoughness.value = uniqueMat.roughness;
+        inputRoughness.className = "material-slider";
+
+        inputRoughness.addEventListener("input", (e) => {
+          uniqueMat.roughness = parseFloat(e.target.value);
+        });
+
+        card.appendChild(roughLabel);
+        card.appendChild(inputRoughness);
+      }
+
+      container.appendChild(card);
     });
   });
 
   if (materials.size === 0) {
-    container.innerHTML = "<p style='color:#777;font-size:0.85rem'>No materials found</p>";
+    container.innerHTML = "<p style='color:#777;font-size:0.85rem'>No configurable materials found</p>";
   }
 }
 
-
-// Resize handler
+// Window resize handler
 function resize() {
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
 
-  camera.aspect = width / height;
-  camera.updateProjectionMatrix();
-  renderer.setSize(width, height, false);
+  if (canvas.width !== width || canvas.height !== height) {
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height, false);
+  }
 }
 
 window.addEventListener("resize", resize);
-resize(); // initial size
 
-// Reset button
+// Reset camera view
 resetBtn.addEventListener("click", () => {
   if (!model) return;
-
-  const box = new THREE.Box3().setFromObject(model);
-  const size = box.getSize(new THREE.Vector3());
-  const maxDim = Math.max(size.x, size.y, size.z);
-  const fov = camera.fov * (Math.PI / 180);
-  let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2)) * 100;  // was 1.6
-
-  camera.position.set(cameraZ * 0.8, cameraZ * 0.5, cameraZ);
+  camera.position.copy(defaultCamPos);
   controls.target.set(0, 0, 0);
   controls.update();
 });
 
-// Animation loop
+// Render loop
 function animate() {
   requestAnimationFrame(animate);
+  resize();
   controls.update();
   renderer.render(scene, camera);
 }
