@@ -85,6 +85,8 @@ loader.load(
     controls.maxPolarAngle = Math.PI / 2;
 
     createMaterialControls(model);
+
+    
   },
   undefined,
   (error) => console.error("Error loading model:", error)
@@ -196,6 +198,55 @@ function createMaterialControls(object) {
     container.innerHTML = "<p style='color:#777;font-size:0.85rem'>No configurable materials found</p>";
   }
 }
+
+function addLogoDecal(model) {
+  // 1. Load the SVG texture
+  const textureLoader = new THREE.TextureLoader();
+  textureLoader.load(
+    'Assets/your-logo.svg', // Replace with the path to your SVG file
+    (decalTexture) => {
+      decalTexture.colorSpace = THREE.SRGBColorSpace;
+
+      // 2. Create a material for the decal
+      const decalMaterial = new THREE.MeshStandardMaterial({
+        map: decalTexture,
+        transparent: true,
+        roughness: 0.5,
+        metalness: 0.1,
+        depthTest: true,
+        depthWrite: false,
+        polygonOffset: true,
+        polygonOffsetFactor: -4, // Prevents z-fighting / flickering against the case surface
+      });
+
+      // 3. Find the target mesh you want to put the logo on (or use the whole model root)
+      // If you want it on a specific part, you can search by name:
+      let targetMesh = null;
+      model.traverse((child) => {
+        if (child.isMesh && !targetMesh) {
+          targetMesh = child; // Grabs the first available mesh as a target
+        }
+      });
+
+      if (!targetMesh) return;
+
+      // 4. Define where the decal goes on the object (Position, Rotation, Scale)
+      // Adjust these vectors based on where your case's front/top surface is located
+      const position = new THREE.Vector3(0, 5, 20); // XYZ coordinates on the model
+      const orientation = new THREE.Euler(0, 0, 0); // Rotation angles
+      const size = new THREE.Vector3(15, 15, 15);   // Width, height, depth projection size
+
+      // 5. Generate and add the decal mesh
+      const decalGeo = new DecalGeometry(targetMesh, position, orientation, size);
+      const decalMesh = new THREE.Mesh(decalGeo, decalMaterial);
+      
+      model.add(decalMesh); // Attach it to the model so it rotates with it
+    },
+    undefined,
+    (err) => console.error("Error loading decal SVG:", err)
+  );
+}
+
 
 // Window resize handler
 function resize() {
