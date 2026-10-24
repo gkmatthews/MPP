@@ -86,16 +86,16 @@ loader.load(
 
 // 10 Preset Colors Palette
 const PRESET_COLORS = [
-  { name: "Matte Black", hex: "#000000" },
-  { name: "Gunmetal", hex: "#75787B" },
-  { name: "Olive Drab", hex: "#5A6D3D" },
-  { name: "Desert Tan", hex: "#C2B29A" },
-  { name: "Brass / Gold", hex: "#F1BE48", metalness: 0.9, roughness: 0.25 },
-  { name: "Powder Puff", hex: "#E684B4" },
-  { name: "Crimson Red", hex: "#BC2726" },
-  { name: "Electric Blue", hex: "#1729AB" },
-  { name: "Safety Orange", hex: "#ED7334" },
-  { name: "Pure White", hex: "#FFFFFF" }
+  { name: "Matte Black", hex: "#000000", metalness: 0.0, roughness: 0.85},
+  { name: "Gunmetal", hex: "#75787B", metalness: 0.0, roughness: 0.85},
+  { name: "Olive Drab", hex: "#5A6D3D", metalness: 0.0, roughness: 0.85},
+  { name: "Desert Tan", hex: "#C2B29A", metalness: 0.0, roughness: 0.85},
+  { name: "Brass / Gold", hex: "#F1BE48", metalness: 0.9, roughness: 0.25},
+  { name: "Powder Puff", hex: "#E684B4", metalness: 0.0, roughness: 0.85},
+  { name: "Crimson Red", hex: "#BC2726", metalness: 0.0, roughness: 0.85},
+  { name: "Electric Blue", hex: "#1729AB", metalness: 0.0, roughness: 0.85},
+  { name: "Safety Orange", hex: "#ED7334", metalness: 0.0, roughness: 0.85},
+  { name: "Pure White", hex: "#FFFFFF", metalness: 0.0, roughness: 0.85}
 ];
 
 function createMaterialControls(object) {
