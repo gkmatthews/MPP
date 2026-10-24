@@ -19,7 +19,7 @@ scene.background = new THREE.Color(0x22252a); // Clean, neutral daylight studio 
 
 // Camera setup
 const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
-camera.position.set(0, 0, 75);
+camera.position.set(0, 0, 100);
 
 // Orbit Controls setup
 const controls = new OrbitControls(camera, renderer.domElement);
