@@ -75,6 +75,8 @@ loader.load(
     controls.maxDistance = maxDim * 10;
     controls.target.set(0, 0, 0);
     controls.update();
+    controls.minPolarAngle = 0;                  // looking straight down from above
+    controls.maxPolarAngle = Math.PI / 2;        // looking straight from the side (horizon)
 
     createMaterialControls(model);
   },
