@@ -53,6 +53,7 @@ const loader = new GLTFLoader();
 loader.setDRACOLoader(dracoLoader);
 
 let model = null;
+let topDecal = null;
 let defaultCamPos = new THREE.Vector3();
 const materials = new Map();
 
@@ -319,6 +320,7 @@ function addLogoDecal(model) {
       
       // Add directly to the main scene in world coordinates
       scene.add(decalMesh);
+      topDecal = decalMesh;
       console.log("Decal projected successfully at position:", position);
     } catch (err) {
       console.error("Error building DecalGeometry:", err);
@@ -423,6 +425,25 @@ function createDecalColorControls() {
     decalRecolor[key]?.(value);  // apply the starting color
   });
 }
+
+const topToggleBtn = document.getElementById("toggle-top-btn");
+let topHidden = false;
+
+function setTopHidden(hidden) {
+  if (!model) return;
+  topHidden = hidden;
+
+  model.traverse((obj) => {
+    if (obj.name.toLowerCase().includes("casetop")) obj.visible = !hidden;
+  });
+  if (topDecal) topDecal.visible = !hidden;
+
+  topToggleBtn.textContent = hidden ? "Show Top" : "Hide Top";
+  topToggleBtn.setAttribute("aria-pressed", String(hidden));
+}
+
+topToggleBtn.addEventListener("click", () => setTopHidden(!topHidden));
+
 
 // Window resize handler
 function resize() {
