@@ -85,6 +85,8 @@ loader.load(
     controls.maxPolarAngle = Math.PI / 2;
 
     createMaterialControls(model);
+    model.updateMatrixWorld(true);  
+    addLogoDecal(model);             
 
     
   },
