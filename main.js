@@ -95,7 +95,7 @@ loader.load(
 // 10 Preset Colors Palette
 const PRESET_COLORS = [
   { name: "Matte Black", hex: "#000000", metalness: 0.0, roughness: 0.85},
-  { name: "Gunmetal", hex: "#75787B", metalness: 0.0, roughness: 0.85},
+  { name: "Gunmetal", hex: "#97999b", metalness: 0.0, roughness: 0.85},
   { name: "Olive Drab", hex: "#8fbc8f", metalness: 0.0, roughness: 0.85},
   { name: "Desert Tan", hex: "#C2B29A", metalness: 0.0, roughness: 0.85},
   { name: "Brass / Gold", hex: "#F1BE48", metalness: 0.9, roughness: 0.25},
