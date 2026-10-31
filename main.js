@@ -86,7 +86,8 @@ loader.load(
 
     createMaterialControls(model);
     model.updateMatrixWorld(true);  
-    addLogoDecal(model);             
+    addLogoDecal(model);
+    addLatchDecals(model);
 
     
   },
@@ -298,6 +299,81 @@ function addLogoDecal(model) {
     }
   });
 }
+
+function loadSvgTexture(svgUrl, width, height) {
+  const c = document.createElement('canvas');
+  c.width = width;
+  c.height = height;
+  const ctx = c.getContext('2d');
+
+  const texture = new THREE.CanvasTexture(c);
+  texture.colorSpace = THREE.SRGBColorSpace;
+
+  const img = new Image();
+  img.onload = () => {
+    ctx.clearRect(0, 0, width, height);
+    ctx.drawImage(img, 0, 0, width, height);
+    texture.needsUpdate = true;
+  };
+  img.onerror = () => console.warn("Could not load SVG:", svgUrl);
+  img.src = svgUrl;
+
+  return texture;
+}
+
+function addLatchDecals(model) {
+  // Settings to tweak
+  const svgUrl = 'Assets/LatchLogo.svg';  // your new file
+  const svgW = 512, svgH = 512;           // the new SVG's width/height attributes
+  const widthRatio = 0.6;                 // logo width as a fraction of the latch width
+  const offsetX = 0;                      // fraction of latch width: + right, - left
+  const offsetY = 0;                      // fraction of latch height: + up, - down
+  const FRONT = 1;                        // 1 = +Z side, -1 = -Z side (flip if it lands on the back)
+
+  model.updateMatrixWorld(true);
+
+  const material = new THREE.MeshStandardMaterial({
+    map: loadSvgTexture(svgUrl, svgW, svgH),
+    transparent: true,
+    alphaTest: 0.01,
+    depthTest: true,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -4,
+    roughness: 0.5,
+    metalness: 0.1
+  });
+
+  model.traverse((child) => {
+    if (!child.isMesh || !child.name.toLowerCase().includes('latch')) return;
+
+    if (!child.geometry.attributes.normal) child.geometry.computeVertexNormals();
+
+    const box = new THREE.Box3().setFromObject(child);
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+
+    const w = size.x * widthRatio;
+    const h = w * (svgH / svgW);
+
+    const position = new THREE.Vector3(
+      center.x + size.x * offsetX,
+      center.y + size.y * offsetY,
+      FRONT > 0 ? box.max.z : box.min.z
+    );
+    const orientation = new THREE.Euler(0, FRONT > 0 ? 0 : Math.PI, 0);
+    const decalSize = new THREE.Vector3(w, h, Math.max(size.z * 0.3, 0.5));
+
+    try {
+      const geo = new DecalGeometry(child, position, orientation, decalSize);
+      scene.add(new THREE.Mesh(geo, material));
+      console.log("Latch decal added on:", child.name);
+    } catch (err) {
+      console.error("Latch decal failed on", child.name, err);
+    }
+  });
+}
+
 
 // Window resize handler
 function resize() {
