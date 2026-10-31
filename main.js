@@ -203,8 +203,8 @@ function createMaterialControls(object) {
 
 function createSvgDecalTexture(svgUrl, onReady) {
   const canvas = document.createElement('canvas');
-  canvas.width = 512;
-  canvas.height = 512;
+  canvas.width = 1024;
+  canvas.height = 765;
   const ctx = canvas.getContext('2d');
 
   const texture = new THREE.CanvasTexture(canvas);
@@ -213,8 +213,8 @@ function createSvgDecalTexture(svgUrl, onReady) {
   const img = new Image();
   img.crossOrigin = 'Anonymous';
   img.onload = () => {
-    ctx.clearRect(0, 0, 512, 512);
-    ctx.drawImage(img, 0, 0, 512, 512);
+    ctx.clearRect(0, 0, 1024, 765);
+    ctx.drawImage(img, 0, 0, 1024, 765);
     texture.needsUpdate = true;
   };
   img.onerror = () => {
