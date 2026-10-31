@@ -325,9 +325,9 @@ function addLatchDecals(model) {
   // Settings to tweak
   const svgUrl = 'Assets/556Latch.svg';  // your new file
   const svgW = 512, svgH = 512;           // the new SVG's width/height attributes
-  const widthRatio = 0.6;                 // logo width as a fraction of the latch width
+  const widthRatio = 0.75;                 // logo width as a fraction of the latch width
   const offsetX = 0;                      // fraction of latch width: + right, - left
-  const offsetY = 0;                      // fraction of latch height: + up, - down
+  const offsetY = -.25;                      // fraction of latch height: + up, - down
   const FRONT = 1;                        // 1 = +Z side, -1 = -Z side (flip if it lands on the back)
 
   model.updateMatrixWorld(true);
