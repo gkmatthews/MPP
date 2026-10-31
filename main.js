@@ -96,7 +96,7 @@ loader.load(
 const PRESET_COLORS = [
   { name: "Matte Black", hex: "#000000", metalness: 0.0, roughness: 0.85},
   { name: "Gunmetal", hex: "#97999b", metalness: 0.0, roughness: 0.85},
-  { name: "Olive Drab", hex: "#8fbc8f", metalness: 0.0, roughness: 0.85},
+  { name: "Olive Drab", hex: "#84ae84", metalness: 0.0, roughness: 0.85},
   { name: "Desert Tan", hex: "#cfc3b0", metalness: 0.0, roughness: 0.85},
   { name: "Brass / Gold", hex: "#fff552", metalness: 0.9, roughness: 0.25},
   { name: "Powder Puff", hex: "#eeaacb", metalness: 0.0, roughness: 0.85},
