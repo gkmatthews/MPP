@@ -285,6 +285,13 @@ function addLogoDecal(model) {
     });
 
     try {
+
+      if (!targetMesh.geometry.attributes.normal) {
+         targetMesh.geometry.computeVertexNormals();
+      }
+      
+      console.log("Target mesh:", targetMesh.name, Object.keys(targetMesh.geometry.attributes));
+      
       const decalGeo = new DecalGeometry(targetMesh, position, orientation, decalSize);
       const decalMesh = new THREE.Mesh(decalGeo, decalMaterial);
       
