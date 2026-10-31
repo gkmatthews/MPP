@@ -168,3 +168,64 @@ body {
   transform: scale(1.1);
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
 }
+
+/* ===== MOBILE / TOUCH ===== */
+@media (pointer: coarse), (max-width: 768px) {
+  body {
+    padding: 8px;
+    align-items: flex-start;
+  }
+
+  .color-panel {
+    padding: 12px;
+    overflow-x: visible;
+  }
+
+  #color-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .color-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .color-row label {
+    max-width: none;
+    font-size: 0.95rem;
+  }
+
+  .swatch-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);   /* 10 presets = 2 rows of 5 */
+    gap: 12px;
+    justify-items: center;
+  }
+
+  .color-swatch {
+    width: 100%;
+    max-width: 52px;
+    height: auto;
+    aspect-ratio: 1;
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* hover doesn't exist on touch, and it can leave swatches "stuck" enlarged */
+  .color-swatch:hover {
+    transform: none;
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .color-swatch.active {
+    transform: scale(1.1);
+    border-color: #ffffff;
+    box-shadow: 0 0 0 2px #3b82f6, 0 0 10px rgba(59, 130, 246, 0.6);
+  }
+}
