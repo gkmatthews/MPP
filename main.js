@@ -88,7 +88,7 @@ loader.load(
     model.updateMatrixWorld(true);  
     addLogoDecal(model);
     addLatchDecals(model);
-
+    createDecalColorControls(); 
     
   },
   undefined,
@@ -202,28 +202,54 @@ function createMaterialControls(object) {
   }
 }
 
-function createSvgDecalTexture(svgUrl, onReady) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 1024;
-  canvas.height = 765;
-  const ctx = canvas.getContext('2d');
+const decalRecolor = {};  // key -> function(hex)
 
-  const texture = new THREE.CanvasTexture(canvas);
+function makeRecolorableTexture(svgUrl, width, height, key) {
+  const c = document.createElement('canvas');
+  c.width = width;
+  c.height = height;
+  const ctx = c.getContext('2d');
+
+  const texture = new THREE.CanvasTexture(c);
   texture.colorSpace = THREE.SRGBColorSpace;
 
   const img = new Image();
-  img.crossOrigin = 'Anonymous';
-  img.onload = () => {
-    ctx.clearRect(0, 0, 1024, 765);
-    ctx.drawImage(img, 0, 0, 1024, 765);
+  let loaded = false;
+  let color = null;  // null = original SVG colors
+
+  function redraw() {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, width, height);
+    if (!loaded) return;
+
+    ctx.drawImage(img, 0, 0, width, height);
+
+    if (color) {
+      // Keep the shape, replace every visible pixel with the chosen color
+      ctx.globalCompositeOperation = 'source-in';
+      ctx.fillStyle = color;
+      ctx.fillRect(0, 0, width, height);
+      ctx.globalCompositeOperation = 'source-over';
+    }
     texture.needsUpdate = true;
-  };
-  img.onerror = () => {
-    console.warn("Could not load SVG from URL:", svgUrl, "- using fallback colored badge.");
-  };
+  }
+
+  img.onload = () => { loaded = true; redraw(); };
+  img.onerror = () => console.warn("Could not load SVG:", svgUrl);
   img.src = svgUrl;
 
-  onReady(texture);
+  decalRecolor[key] = (hex) => { color = hex; redraw(); };
+
+  return texture;
+}
+
+// Keep the old function names so addLogoDecal and addLatchDecals don't need edits
+function createSvgDecalTexture(svgUrl, onReady) {
+  onReady(makeRecolorableTexture(svgUrl, 1024, 765, 'top'));
+}
+
+function loadSvgTexture(svgUrl, width, height) {
+  return makeRecolorableTexture(svgUrl, width, height, 'latch');
 }
 
 function addLogoDecal(model) {
@@ -300,27 +326,6 @@ function addLogoDecal(model) {
   });
 }
 
-function loadSvgTexture(svgUrl, width, height) {
-  const c = document.createElement('canvas');
-  c.width = width;
-  c.height = height;
-  const ctx = c.getContext('2d');
-
-  const texture = new THREE.CanvasTexture(c);
-  texture.colorSpace = THREE.SRGBColorSpace;
-
-  const img = new Image();
-  img.onload = () => {
-    ctx.clearRect(0, 0, width, height);
-    ctx.drawImage(img, 0, 0, width, height);
-    texture.needsUpdate = true;
-  };
-  img.onerror = () => console.warn("Could not load SVG:", svgUrl);
-  img.src = svgUrl;
-
-  return texture;
-}
-
 function addLatchDecals(model) {
   // Settings to tweak
   const svgUrl = 'Assets/556Latch.svg';  // your new file
@@ -374,6 +379,33 @@ function addLatchDecals(model) {
   });
 }
 
+function createDecalColorControls() {
+  const container = document.getElementById("color-controls");
+
+  const decals = [
+    { key: 'top',   label: 'Top Logo',   value: '#000000' },
+    { key: 'latch', label: 'Latch Logo', value: '#ffffff' }
+  ];
+
+  decals.forEach(({ key, label, value }) => {
+    const row = document.createElement("div");
+    row.className = "color-row";
+
+    const lbl = document.createElement("label");
+    lbl.textContent = label;
+    row.appendChild(lbl);
+
+    const input = document.createElement("input");
+    input.type = "color";
+    input.value = value;
+    input.addEventListener("input", () => decalRecolor[key]?.(input.value));
+    row.appendChild(input);
+
+    container.appendChild(row);
+
+    decalRecolor[key]?.(value);  // apply the starting color
+  });
+}
 
 // Window resize handler
 function resize() {
