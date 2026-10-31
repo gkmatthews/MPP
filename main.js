@@ -384,24 +384,41 @@ function createDecalColorControls() {
 
   const decals = [
     { key: 'top',   label: 'Top Logo',   value: '#000000' },
-    { key: 'latch', label: 'Latch Logo', value: '#ffffff' }
+    { key: 'latch', label: 'Latch Logo', value: '#000000' }
   ];
 
   decals.forEach(({ key, label, value }) => {
-    const row = document.createElement("div");
-    row.className = "color-row";
+    const card = document.createElement("div");
+    card.className = "color-row";
 
     const lbl = document.createElement("label");
     lbl.textContent = label;
-    row.appendChild(lbl);
+    card.appendChild(lbl);
 
-    const input = document.createElement("input");
-    input.type = "color";
-    input.value = value;
-    input.addEventListener("input", () => decalRecolor[key]?.(input.value));
-    row.appendChild(input);
+    const swatchContainer = document.createElement("div");
+    swatchContainer.className = "swatch-container";
 
-    container.appendChild(row);
+    PRESET_COLORS.forEach((preset) => {
+      const swatch = document.createElement("button");
+      swatch.className = "color-swatch";
+      swatch.style.backgroundColor = preset.hex;
+      swatch.title = preset.name;
+
+      if (preset.hex.toLowerCase() === value.toLowerCase()) {
+        swatch.classList.add("active");
+      }
+
+      swatch.addEventListener("click", () => {
+        swatchContainer.querySelectorAll(".color-swatch").forEach(s => s.classList.remove("active"));
+        swatch.classList.add("active");
+        decalRecolor[key]?.(preset.hex);
+      });
+
+      swatchContainer.appendChild(swatch);
+    });
+
+    card.appendChild(swatchContainer);
+    container.appendChild(card);
 
     decalRecolor[key]?.(value);  // apply the starting color
   });
