@@ -261,15 +261,14 @@ function addLogoDecal(model) {
   const center = box.getCenter(new THREE.Vector3());
   const size = box.getSize(new THREE.Vector3());
 
-  // Position projector at the center-top face of the bounding box
-  const position = new THREE.Vector3(center.x, box.max.y, center.z);
+  const logoWidth = size.x * 0.25;    // resize: bigger number = bigger logo
+  const logoOffsetX = size.x * 0.2;   // + moves right, - moves left
+  const logoOffsetZ = size.z * 0.2;   // + moves toward the front (camera side), - toward the back
+  const logoRotation = 0;             // spin the logo in radians (Math.PI / 2 = 90°)
 
-  // Rotate projector -90 deg on X axis to point down onto top surface (+Y to -Y projection)
-  const orientation = new THREE.Euler(-Math.PI / 2, 0, 0);
-
-  // Projection dimensions: (Width, Height, Depth)
-  // Making depth equal to model size ensures the box intersects geometry cleanly
-  const decalSize = new THREE.Vector3(size.x * 0.4, size.z * 0.4, size.y * 2);
+  const position = new THREE.Vector3(center.x + logoOffsetX, box.max.y, center.z + logoOffsetZ);
+  const orientation = new THREE.Euler(-Math.PI / 2, 0, logoRotation);
+  const decalSize = new THREE.Vector3(logoWidth, logoWidth, size.y * 2);
 
   createSvgDecalTexture('Assets/556Image.svg', (decalTexture) => {
     const decalMaterial = new THREE.MeshStandardMaterial({
