@@ -101,7 +101,7 @@ const PRESET_COLORS = [
   { name: "Brass / Gold", hex: "#fff552", metalness: 0.9, roughness: 0.25},
   { name: "Powder Puff", hex: "#eeaacb", metalness: 0.0, roughness: 0.85},
   { name: "Crimson Red", hex: "#BC2726", metalness: 0.0, roughness: 0.85},
-  { name: "Electric Blue", hex: "#3141b4", metalness: 0.0, roughness: 0.85},
+  { name: "Electric Blue", hex: "#4452bb", metalness: 0.0, roughness: 0.85},
   { name: "Safety Orange", hex: "#ED7334", metalness: 0.0, roughness: 0.85},
   { name: "Pure White", hex: "#FFFFFF", metalness: 0.0, roughness: 0.85}
 ];
