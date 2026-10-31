@@ -286,7 +286,7 @@ function addLogoDecal(model) {
 
   const logoWidth = size.x * 0.875;    // resize: bigger number = bigger logo
   const logoOffsetX = size.x * -0.025;   // + moves right, - moves left
-  const logoOffsetZ = size.z * 0.325;   // + moves toward the front (camera side), - toward the back
+  const logoOffsetZ = size.z * 0.3;   // + moves toward the front (camera side), - toward the back
   const logoRotation = 0;             // spin the logo in radians (Math.PI / 2 = 90°)
 
   const position = new THREE.Vector3(center.x + logoOffsetX, box.max.y, center.z + logoOffsetZ);
@@ -332,7 +332,7 @@ function addLatchDecals(model) {
   const svgW = 512, svgH = 512;           // the new SVG's width/height attributes
   const widthRatio = 0.75;                 // logo width as a fraction of the latch width
   const offsetX = 0;                      // fraction of latch width: + right, - left
-  const offsetY = -0.05;                      // fraction of latch height: + up, - down
+  const offsetY = -0.1;                      // fraction of latch height: + up, - down
   const FRONT = 1;                        // 1 = +Z side, -1 = -Z side (flip if it lands on the back)
 
   model.updateMatrixWorld(true);
