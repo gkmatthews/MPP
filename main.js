@@ -323,7 +323,7 @@ function loadSvgTexture(svgUrl, width, height) {
 
 function addLatchDecals(model) {
   // Settings to tweak
-  const svgUrl = 'Assets/LatchLogo.svg';  // your new file
+  const svgUrl = 'Assets/556Latch.svg';  // your new file
   const svgW = 512, svgH = 512;           // the new SVG's width/height attributes
   const widthRatio = 0.6;                 // logo width as a fraction of the latch width
   const offsetX = 0;                      // fraction of latch width: + right, - left
