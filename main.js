@@ -259,8 +259,8 @@ function addLogoDecal(model) {
   const size = box.getSize(new THREE.Vector3());
 
   const logoWidth = size.x * 0.875;    // resize: bigger number = bigger logo
-  const logoOffsetX = size.x * -0.01;   // + moves right, - moves left
-  const logoOffsetZ = size.z * 0.275;   // + moves toward the front (camera side), - toward the back
+  const logoOffsetX = size.x * -0.05;   // + moves right, - moves left
+  const logoOffsetZ = size.z * 0.35;   // + moves toward the front (camera side), - toward the back
   const logoRotation = 0;             // spin the logo in radians (Math.PI / 2 = 90°)
 
   const position = new THREE.Vector3(center.x + logoOffsetX, box.max.y, center.z + logoOffsetZ);
