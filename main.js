@@ -97,7 +97,7 @@ const PRESET_COLORS = [
   { name: "Matte Black", hex: "#000000", metalness: 0.0, roughness: 0.85},
   { name: "Gunmetal", hex: "#97999b", metalness: 0.0, roughness: 0.85},
   { name: "Olive Drab", hex: "#8fbc8f", metalness: 0.0, roughness: 0.85},
-  { name: "Desert Tan", hex: "#d9cfc0", metalness: 0.0, roughness: 0.85},
+  { name: "Desert Tan", hex: "#c6b7a0", metalness: 0.0, roughness: 0.85},
   { name: "Brass / Gold", hex: "#F1BE48", metalness: 0.9, roughness: 0.25},
   { name: "Powder Puff", hex: "#E684B4", metalness: 0.0, roughness: 0.85},
   { name: "Crimson Red", hex: "#BC2726", metalness: 0.0, roughness: 0.85},
