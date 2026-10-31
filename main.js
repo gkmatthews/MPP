@@ -207,10 +207,6 @@ function createSvgDecalTexture(svgUrl, onReady) {
   canvas.height = 512;
   const ctx = canvas.getContext('2d');
 
-  // Draw initial visible badge background so we can verify decal projection immediately
-  ctx.fillStyle = '#ff0055'; // Magenta test color
-  ctx.fillRect(0, 0, 512, 512);
-
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
 
